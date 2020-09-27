@@ -1,9 +1,10 @@
 var json;
 
 document.getElementById("btn").addEventListener("click", search);
+document.getElementById("filtros").style.visibility = "hidden";
 
 function ordenar() {
-    let valores = json;
+    let valores = JSON.parse(JSON.stringify(json));
     let relevancia = document.getElementById("select").value;
     verificarRelevancia(relevancia, valores);
     imprimirTabla(valores);
@@ -52,7 +53,9 @@ function search() {
         let respuestaSinHtml = eliminarHtml(response);
         json = JSON.parse(respuestaSinHtml);
         ordenar();
+        document.getElementById("filtros").style.visibility = "visible";
         document.getElementById("select").addEventListener("change", ordenar);
+        
     }, function(error) {
         alert("Se ha producido un error, intente más tarde.")
     })
@@ -117,8 +120,6 @@ function sortJSON(data, key, orden) {
         }
     });
 }
-
-//var oJSON = sortJSON(elJSON, 'num', 'asc');
 
 function eliminarHtml(cadena) {
     return cadena.replace(/<\/?[^>]+>/gi, '');
