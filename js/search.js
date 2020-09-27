@@ -1,51 +1,58 @@
+var json;
+
 document.getElementById("btn").addEventListener("click", search);
+
+function ordenar() {
+    let valores = json;
+    let relevancia = document.getElementById("select").value;
+    verificarRelevancia(relevancia, valores);
+    imprimirTabla(valores);
+}
+
+function imprimirTabla(valores) {
+    if (!document.getElementById("table")) {
+        var b = document.createElement("table");
+        b.setAttribute("id", "table");
+        document.getElementById("resultados").appendChild(b);
+    }
+    document.getElementById("table").innerHTML = '<tbody><tr><th scope="col">Id</th><th scope="col">Título</th><th scope="col">Descripción</th><th scope="col">Fecha</th><th scope="col">Tamaño</th><th scope="col">Url</th></tr></tbody>';
+    let i = 0;
+    while((valores.query.search) && (i<10) ) {
+        let id = valores.query.search[i].pageid;
+        let title = valores.query.search[i].title;
+        let description = valores.query.search[i].snippet + "...";
+        let timestamp = valores.query.search[i].timestamp;
+        let size = valores.query.search[i].size;
+        let url = "https://es.wikipedia.org/wiki/" + title;
+        let tr = document.createElement('TR');
+        tr.appendChild(generarColumna(id, "id"));
+        tr.appendChild(generarColumna(title, "title"));
+        tr.appendChild(generarColumna(description, "description"));
+        tr.appendChild(generarColumna(timestamp, "fecha"));
+        tr.appendChild(generarColumna(size, "size"));
+        var node = document.createElement("A");
+        var textnode = document.createTextNode(url);
+        node.appendChild(textnode, "url");
+        node.setAttribute("href", url)
+        tr.appendChild(node);
+        document.getElementById("table").appendChild(tr);
+        i++;
+    }
+}
 
 function search() {
     let palabraBuscar = document.getElementById("inputSearch").value;
-    let relevancia = document.getElementById("select").value;
     if(!palabraBuscar) {
         alert("Introduce una palabra en el buscador")
         return;
     }
     let palabraDecodificada = removeAccents(palabraBuscar.replace(/ /g,"_"));
-    let urlBusqueda = 'buscador.php?consulta=' + palabraDecodificada + "&ordenar=" + relevancia;
+    let urlBusqueda = 'buscador.php?consulta=' + palabraDecodificada;
     get(urlBusqueda).then(function(response) {
         let respuestaSinHtml = eliminarHtml(response);
         json = JSON.parse(respuestaSinHtml);
-        if (relevancia == "Size Asc") {
-            var oJSON = sortJSON(json.query.search, 'size', 'asc');
-        }
-        if (relevancia == "Size Desc") {
-            var oJSON = sortJSON(json.query.search, 'size', 'desc');
-        }
-        if (!document.getElementById("table")) {
-            var b = document.createElement("table");
-            b.setAttribute("id", "table");
-            document.getElementById("resultados").appendChild(b);
-        }
-        document.getElementById("table").innerHTML = '<tbody><tr><th scope="col">Id</th><th scope="col">Título</th><th scope="col">Descripción</th><th scope="col">Fecha</th><th scope="col">Tamaño</th><th scope="col">Url</th></tr></tbody>';
-        let i = 0;
-        while((json.query.search) && (i<10) ) {
-            let id = json.query.search[i].pageid;
-            let title = json.query.search[i].title;
-            let description = json.query.search[i].snippet + "...";
-            let timestamp = json.query.search[i].timestamp;
-            let size = json.query.search[i].size;
-            let url = "https://es.wikipedia.org/wiki/" + title;
-            let tr = document.createElement('TR');
-            tr.appendChild(generarColumna(id, "id"));
-            tr.appendChild(generarColumna(title, "title"));
-            tr.appendChild(generarColumna(description, "description"));
-            tr.appendChild(generarColumna(timestamp, "fecha"));
-            tr.appendChild(generarColumna(size, "size"));
-            var node = document.createElement("A");
-            var textnode = document.createTextNode(url);
-            node.appendChild(textnode, "url");
-            node.setAttribute("href", url)
-            tr.appendChild(node);
-            document.getElementById("table").appendChild(tr);
-            i++;
-        }
+        ordenar();
+        document.getElementById("select").addEventListener("change", ordenar);
     }, function(error) {
         alert("Se ha producido un error, intente más tarde.")
     })
@@ -79,6 +86,21 @@ function get(url) {
         };
         req.send();
     });
+}
+
+function verificarRelevancia(relevancia, valores) {
+    if (relevancia == "Size Asc") {
+        sortJSON(valores.query.search, 'size', 'asc');
+    }
+    if (relevancia == "Size Desc") {
+        sortJSON(valores.query.search, 'size', 'desc');
+    }
+    if(relevancia == "Fecha Asc") {
+        sortJSON(valores.query.search, 'timestamp', 'asc');
+    }
+    if(relevancia == "Fecha Desc") {
+        sortJSON(valores.query.search, 'timestamp', 'desc');
+    }
 }
 
 function sortJSON(data, key, orden) {
