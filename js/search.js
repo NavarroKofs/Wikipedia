@@ -11,33 +11,38 @@ function ordenar() {
 }
 
 function imprimirTabla(valores) {
-    if (!document.getElementById("table")) {
-        var b = document.createElement("table");
-        b.setAttribute("id", "table");
-        document.getElementById("resultados").appendChild(b);
-    }
-    document.getElementById("table").innerHTML = '<tbody><tr><th scope="col">Id</th><th scope="col">Título</th><th scope="col">Descripción</th><th scope="col">Fecha</th><th scope="col">Tamaño</th><th scope="col">Url</th></tr></tbody>';
-    let i = 0;
-    while((valores.query.search) && (i<10) ) {
-        let id = valores.query.search[i].pageid;
-        let title = valores.query.search[i].title;
-        let description = valores.query.search[i].snippet + "...";
-        let timestamp = valores.query.search[i].timestamp;
-        let size = valores.query.search[i].size;
-        let url = "https://es.wikipedia.org/wiki/" + title;
-        let tr = document.createElement('TR');
-        tr.appendChild(generarColumna(id, "id"));
-        tr.appendChild(generarColumna(title, "title"));
-        tr.appendChild(generarColumna(description, "description"));
-        tr.appendChild(generarColumna(timestamp, "fecha"));
-        tr.appendChild(generarColumna(size, "size"));
-        var node = document.createElement("A");
-        var textnode = document.createTextNode(url);
-        node.appendChild(textnode, "url");
-        node.setAttribute("href", url)
-        tr.appendChild(node);
-        document.getElementById("table").appendChild(tr);
-        i++;
+    if(valores.query.search.length > 0) {
+        if (!document.getElementById("table")) {
+            var b = document.createElement("table");
+            b.setAttribute("id", "table");
+            document.getElementById("resultados").appendChild(b);
+        }
+        document.getElementById("table").innerHTML = '<tbody><tr><th scope="col">Id</th><th scope="col">Título</th><th scope="col">Descripción</th><th scope="col">Fecha</th><th scope="col">Tamaño</th><th scope="col">Url</th></tr></tbody>';
+        let i = 0;
+        while((valores.query.search) && (i<10) ) {
+            let id = valores.query.search[i].pageid;
+            let title = valores.query.search[i].title;
+            let description = valores.query.search[i].snippet + "...";
+            let timestamp = valores.query.search[i].timestamp;
+            let size = valores.query.search[i].size;
+            let url = "https://es.wikipedia.org/wiki/" + title;
+            let tr = document.createElement('TR');
+            tr.appendChild(generarColumna(id, "id"));
+            tr.appendChild(generarColumna(title, "title"));
+            tr.appendChild(generarColumna(description, "description"));
+            tr.appendChild(generarColumna(timestamp, "fecha"));
+            tr.appendChild(generarColumna(size, "size"));
+            var node = document.createElement("A");
+            var textnode = document.createTextNode(url);
+            node.appendChild(textnode, "url");
+            node.setAttribute("href", url)
+            tr.appendChild(node);
+            document.getElementById("table").appendChild(tr);
+            i++;
+            document.getElementById("filtros").style.visibility = "visible";
+        }
+    } else {
+        alert("No se encontraron resultados.");
     }
 }
 
@@ -53,9 +58,7 @@ function search() {
         let respuestaSinHtml = eliminarHtml(response);
         json = JSON.parse(respuestaSinHtml);
         ordenar();
-        document.getElementById("filtros").style.visibility = "visible";
         document.getElementById("select").addEventListener("change", ordenar);
-        
     }, function(error) {
         alert("Se ha producido un error, intente más tarde.")
     })
